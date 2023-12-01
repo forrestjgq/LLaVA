@@ -22,6 +22,7 @@ class CLIPVisionTower(nn.Module):
     def load_model(self, path=None):
         if path is None:
             path = self.vision_tower_name
+        print(f"load vision tower from {path}")
         self.image_processor = CLIPImageProcessor.from_pretrained(path)
         self.vision_tower = CLIPVisionModel.from_pretrained(path)
         self.vision_tower.requires_grad_(False)

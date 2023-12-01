@@ -62,23 +62,23 @@ class LlavaEval():
         self.image_token_se = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN
 
     def generate(self,query: str, image_files, temperature=0.2, top_p=None, num_beams:int=1, max_new_tokens=512):
+        qs = query
+        if IMAGE_PLACEHOLDER in qs:
+            if self.model.config.mm_use_im_start_end:
+                qs = re.sub(IMAGE_PLACEHOLDER, self.image_token_se, qs)
+            else:
+                qs = re.sub(IMAGE_PLACEHOLDER, DEFAULT_IMAGE_TOKEN, qs)
+        else:
+            if self.model.config.mm_use_im_start_end:
+                qs = self.image_token_se + "\n" + qs
+            else:
+                qs = DEFAULT_IMAGE_TOKEN + "\n" + qs
+        
         conv = conv_templates[self.conv_mode].copy()
         conv.append_message(conv.roles[0], qs)
         conv.append_message(conv.roles[1], None)
         prompt = conv.get_prompt()
 
-        qs = query
-        if IMAGE_PLACEHOLDER in qs:
-            if self.model.config.mm_use_im_start_end:
-                qs = re.sub(IMAGE_PLACEHOLDER, image_token_se, qs)
-            else:
-                qs = re.sub(IMAGE_PLACEHOLDER, DEFAULT_IMAGE_TOKEN, qs)
-        else:
-            if self.model.config.mm_use_im_start_end:
-                qs = image_token_se + "\n" + qs
-            else:
-                qs = DEFAULT_IMAGE_TOKEN + "\n" + qs
-        
         if isinstance(image_files, str):
             image_files = [image_files]
         images = load_images(image_files)
