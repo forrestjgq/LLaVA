@@ -9,9 +9,9 @@ pushd $root
 options=""
 # options="$options --progress=plain"
 if [ ! -z $proxy ]; then
-    options="$options --build-arg proxy=$proxy
+    options="$options --build-arg proxy=$proxy"
 fi
-cmd="DOCKER_BUILDKIT=1 docker build $options -t $url:$tag ."
+cmd="docker build $options -t $url:$tag ."
 echo $cmd
-$cmd
+DOCKER_BUILDKIT=1 $cmd
 popd
