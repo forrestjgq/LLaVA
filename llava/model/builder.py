@@ -21,6 +21,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, AutoConfig, BitsAn
 import torch
 from llava.model import *
 from llava.constants import DEFAULT_IMAGE_PATCH_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN
+from pathlib import Path
 
 
 def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, load_4bit=False, device_map="auto", device="cuda", **kwargs):
@@ -139,7 +140,11 @@ def load_pretrained_model(model_path, model_base, model_name, load_8bit=False, l
 
         vision_tower = model.get_vision_tower()
         if not vision_tower.is_loaded:
-            vision_tower.load_model()
+            vision_path = Path(model_path) / 'vision_tower'
+            sub_model = None
+            if vision_path.exists() and vision_path.is_dir():
+                sub_model = str(vision_path.absolute())
+            vision_tower.load_model(path=sub_model)
         vision_tower.to(device=device, dtype=torch.float16)
         image_processor = vision_tower.image_processor
 
